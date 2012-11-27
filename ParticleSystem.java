@@ -35,7 +35,9 @@ public class ParticleSystem{
 			double vX = ((rand.nextDouble()*2)-1)*100;
 			double vY =(rand.nextDouble()*-1)*100;
 			double life = (rand.nextDouble()*100)+150;
-			plist.add(new Particle(x, y, vX, vY, 10000, .0001, life));
+			Particle p = new Particle(x, y, vX, vY, 1000, .01, life);
+			p.multVelocity(8);
+			plist.add(p);
 		}
 	}
 	
