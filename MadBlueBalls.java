@@ -6,7 +6,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
-import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,6 +23,8 @@ public class MadBlueBalls extends JFrame {
 	Vector velocity;
 	Vector gravity;
 	Vector friction;
+	Vector targetLoc;
+	Vector targetCenter;
 	BufferedImage ballImage;
 	BufferedImage Background;
 	BufferedImage grass;
@@ -32,6 +33,7 @@ public class MadBlueBalls extends JFrame {
 	ParticleSystem deadBall;
 	Random rand;
 	boolean hasBounced;
+	boolean hitTarget;
 	
 	public MadBlueBalls() throws IOException
 	{
@@ -46,6 +48,9 @@ public class MadBlueBalls extends JFrame {
 		
 		// Set up the target
 		target = ImageIO.read(new File("target.png"));
+		targetLoc = new Vector(950,500);
+		targetCenter = new Vector(targetLoc.getX()+8,targetLoc.getY()+23);
+		hitTarget = false;
 		
 		gravity = new Vector(0, 9.8);
 		rand = new Random();
@@ -74,27 +79,31 @@ public class MadBlueBalls extends JFrame {
 		int x = (int) location.getX();
 		int y = (int) location.getY();
 		
+		// Detect a hit target
+		Vector distFromCent = Vector.sub(targetCenter, location);
+		if (distFromCent.magnitude()<30)
+			hitTarget = true;
+		
+		
 		// Bounce the ball if it hits the ground
 		if (y>=600)
 		{
 			ball.setLocation(new Vector(x,599));
 			ball.bounceY();
-			if (!hasBounced)
+			ball.multVelocity(0.75);
+			if (!hasBounced && !hitTarget) // Explosion
 			{
 				explosion = new ParticleSystem(x,y-10,50);
 				explosion.create(); // Should put this directly in the particlesystem constructor
 				deadBall = new ParticleSystem(x,y-10,10);
 				deadBall.create();
+				hasBounced = true;
 			}
-			ball.multVelocity(0.75);
-			hasBounced = true;
-		}
-
-		// Explosion test
-		if (hasBounced)
-		{
-			explosion.update();
-			deadBall.update();
+			else if (!hitTarget) // Explosion already happened
+			{
+				explosion.update();
+				deadBall.update();
+			}
 		}
 	}
 	
@@ -127,8 +136,14 @@ public class MadBlueBalls extends JFrame {
 		g.setColor(new Color(139,69,19,255));
 		g.fillRect(198, 455, 20, 170);
 		
+		/*
+		 * PUT THIS AS THE LAST THING DRAWN!
+		 */
 		// Draw the target
-		g.drawImage(target, 950, 500, this);
+		
+		int tX = (int) targetLoc.getX();
+		int tY = (int) targetLoc.getY();
+		g.drawImage(target, tX, tY, this);
 		
 		// Explosion
 		if(hasBounced)
