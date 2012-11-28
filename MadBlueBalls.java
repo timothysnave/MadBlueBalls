@@ -20,7 +20,7 @@ public class MadBlueBalls extends JFrame {
 	int diameter;
 	Image dbImage;
 	Graphics dbGraphics;
-	Vector velocity;
+	Vector velocity; // Unfortunately necessary
 	Vector gravity;
 	Vector friction;
 	Vector targetLoc;
@@ -52,10 +52,13 @@ public class MadBlueBalls extends JFrame {
 		targetCenter = new Vector(targetLoc.getX()+8,targetLoc.getY()+23);
 		hitTarget = false;
 		
+		// Set up various simple things
 		gravity = new Vector(0, 9.8);
 		rand = new Random();
 		hasBounced = false;
 		
+		
+		// Set up the window
 		setSize(1200,700);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setVisible(true);
@@ -83,7 +86,7 @@ public class MadBlueBalls extends JFrame {
 			
 			// Detect a hit target
 			Vector distFromCent = Vector.sub(targetCenter, location);
-			if (distFromCent.magnitude()<30)
+			if (distFromCent.magnitude()<25)
 				hitTarget = true;
 			
 			
@@ -113,10 +116,21 @@ public class MadBlueBalls extends JFrame {
 	
 	public void paint(Graphics g)
 	{
-		dbImage = createImage(1200,700);
-		dbGraphics = dbImage.getGraphics();
-		paintComponent(dbGraphics);
-		g.drawImage(dbImage, 0, 0, this);
+		/*
+		 * Double buffered graphics
+		 * 
+		 * This creates an offscreen image,
+		 * draws everything on it,
+		 * then replaces the image currently
+		 * in the window with the new image.
+		 * 
+		 * This keeps things from creating
+		 * trails, when they move.
+		 */
+		dbImage = createImage(1200,700); // Create new image
+		dbGraphics = dbImage.getGraphics(); // get its graphics
+		paintComponent(dbGraphics); // Actually draws the new image
+		g.drawImage(dbImage, 0, 0, this); // puts the image into the window
 	}
 	
 	public void paintComponent(Graphics g)
@@ -149,9 +163,15 @@ public class MadBlueBalls extends JFrame {
 		int tY = (int) targetLoc.getY();
 		g.drawImage(target, tX, tY, this);
 		
-		// Explosion
+		/*
+		 * Draw the explosion
+		 * 
+		 * Both for loops do the same thing, but
+		 * the particles are colored differently
+		 */
 		if(hasBounced)
 		{
+			// Brown particles
 			ArrayList<Particle> particles = explosion.getParticles();
 			for (Particle P: particles)
 			{
@@ -163,6 +183,7 @@ public class MadBlueBalls extends JFrame {
 				g.setColor(Color.BLACK);
 				g.drawOval(pX, pY, 10, 10);
 			}
+			// Blue particles
 			ArrayList<Particle> deadBallParts = deadBall.getParticles();
 			for (Particle P: deadBallParts)
 			{
@@ -175,30 +196,11 @@ public class MadBlueBalls extends JFrame {
 				g.drawOval(pX, pY, 10, 10);
 			}
 		}
-		else
+		else // If the ball either hasn't hit the ground, or hit the target
 		{
 			//Draw the ball
 			g.drawImage(ballImage, x-x/diameter, y-y/diameter, this);
 		}
-		
-		
-		
-		
-		// Draw the ball
-		
-		// Rotation!
-	/*	int w = ballImage.getWidth();
-		int h = ballImage.getHeight();
-		BufferedImage ball2 = new BufferedImage(w, h, ballImage.getType());
-		Graphics2D gb = ball2.createGraphics();
-		gb.rotate(Math.toRadians(10), w/2, h/2);
-		gb.drawImage(ballImage, 0, 0, this);
-		ballImage = ball2;*/
-		
-
-		
-		
-		//ballImage.createGraphics().rotate(Math.PI/2);
 		
 		repaint();
 	}
@@ -217,26 +219,6 @@ public class MadBlueBalls extends JFrame {
 	public static void main(String[] args) throws IOException {
 		new MadBlueBalls();
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	
 	private class ML implements MouseListener
 	{
@@ -268,8 +250,12 @@ public class MadBlueBalls extends JFrame {
 		@Override
 		public void mouseReleased(MouseEvent e) {
 			// TODO Auto-generated method stub
+			
+			// Properly scale & limit the velocity
 			velocity.div(10);
 			velocity.limit(10);
+			
+			// Set the ball's velocity
 			ball.setVelocity(velocity);
 		}
 		
@@ -277,25 +263,47 @@ public class MadBlueBalls extends JFrame {
 
 	private class MML implements MouseMotionListener
 	{
+		/*
+		 * Get the ball's location
+		 * 
+		 * This is important for tracking the ball's original location.
+		 * Only used when the ball is on the 'slingshot', for creating
+		 * the velocity vector, to shoot the ball.
+		 */
 		Vector oldLoc = ball.getLocation();
+		
 		@Override
 		public void mouseDragged(MouseEvent mE) {
+			// Get the mouse's location
 			int x = mE.getX();
 			int y = mE.getY();
+			
+			// Create a vector from the location
 			Vector newLoc = new Vector(x,y);
 			Vector diff = Vector.sub(newLoc, oldLoc);
-			diff.limit(100);
+			
+			// This keeps the ball from moving too far from the slingshot
+			diff.limit(100); 
+			
+			// Set the ball to the new location (animation purposes)
 			newLoc = oldLoc.get();
 			newLoc.add(diff);
 			ball.setLocation(newLoc);
+			
+			/*
+			 * Invert the velocity, so the ball shoots in the opposite
+			 * direction from where it was dragged by the mouse
+			 */
 			diff.mult(-1);
+			
+			// Set the velocity variable (not the ball's velocity yet)
 			velocity = diff;
 		}
 
 		@Override
 		public void mouseMoved(MouseEvent arg0) {
-			// TODO Auto-generated method stub
 			
+			// We don't need no stinkin' mouseMoved method!
 		}
 		
 	}
