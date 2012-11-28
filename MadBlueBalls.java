@@ -65,41 +65,45 @@ public class MadBlueBalls extends JFrame {
 	
 	public void update()
 	{
-		// Only apply gravity if ball has been shot
-		if (!ball.getVelocity().isZero())
+		if (!hasBounced)
 		{
-			ball.applyForce(gravity);
-		}
-		
-		// Update the ball's location
-		ball.updateLocation();
-		
-		// Get the location
-		Vector location = ball.getLocation();
-		int x = (int) location.getX();
-		int y = (int) location.getY();
-		
-		// Detect a hit target
-		Vector distFromCent = Vector.sub(targetCenter, location);
-		if (distFromCent.magnitude()<30)
-			hitTarget = true;
-		
-		
-		// Bounce the ball if it hits the ground
-		if (y>=600)
-		{
-			ball.setLocation(new Vector(x,599));
-			ball.bounceY();
-			ball.multVelocity(0.75);
-			if (!hasBounced && !hitTarget) // Explosion
+			// Only apply gravity if ball has been shot
+			if (!ball.getVelocity().isZero())
 			{
-				explosion = new ParticleSystem(x,y-10,50);
-				explosion.create(); // Should put this directly in the particlesystem constructor
-				deadBall = new ParticleSystem(x,y-10,10);
-				deadBall.create();
-				hasBounced = true;
+				ball.applyForce(gravity);
+			}
+			
+			// Update the ball's location
+			ball.updateLocation();
+			
+			// Get the location
+			Vector location = ball.getLocation();
+			int x = (int) location.getX();
+			int y = (int) location.getY();
+			
+			// Detect a hit target
+			Vector distFromCent = Vector.sub(targetCenter, location);
+			if (distFromCent.magnitude()<30)
+				hitTarget = true;
+			
+			
+			// Bounce the ball if it hits the ground
+			if (y>=600)
+			{
+				ball.setLocation(new Vector(x,599));
+				ball.bounceY();
+				ball.multVelocity(0.75);
+				if (!hasBounced && !hitTarget) // Explosion
+				{
+					explosion = new ParticleSystem(x,y-10,50);
+					explosion.create(); // Should put this directly in the particlesystem constructor
+					deadBall = new ParticleSystem(x,y-10,10);
+					deadBall.create();
+					hasBounced = true;
+				}
 			}
 		}
+		
 		if (hasBounced && !hitTarget) // Explosion already happened
 		{
 			explosion.update();
