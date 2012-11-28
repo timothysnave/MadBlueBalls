@@ -29,6 +29,7 @@ public class MadBlueBalls extends JFrame {
 	BufferedImage grass;
 	BufferedImage target;
 	ParticleSystem explosion;
+	ParticleSystem deadBall;
 	Random rand;
 	boolean hasBounced;
 	
@@ -82,6 +83,8 @@ public class MadBlueBalls extends JFrame {
 			{
 				explosion = new ParticleSystem(x,y-10,50);
 				explosion.create(); // Should put this directly in the particlesystem constructor
+				deadBall = new ParticleSystem(x,y-10,10);
+				deadBall.create();
 			}
 			ball.multVelocity(0.75);
 			hasBounced = true;
@@ -89,7 +92,10 @@ public class MadBlueBalls extends JFrame {
 
 		// Explosion test
 		if (hasBounced)
+		{
 			explosion.update();
+			deadBall.update();
+		}
 	}
 	
 	public void paint(Graphics g)
@@ -124,9 +130,6 @@ public class MadBlueBalls extends JFrame {
 		// Draw the target
 		g.drawImage(target, 950, 500, this);
 		
-		//Draw the ball
-		g.drawImage(ballImage, x-x/diameter, y-y/diameter, this);
-		
 		// Explosion
 		if(hasBounced)
 		{
@@ -141,6 +144,22 @@ public class MadBlueBalls extends JFrame {
 				g.setColor(Color.BLACK);
 				g.drawOval(pX, pY, 10, 10);
 			}
+			ArrayList<Particle> deadBallParts = deadBall.getParticles();
+			for (Particle P: deadBallParts)
+			{
+				Vector expLoc = P.getLocation();
+				int pX = (int) expLoc.getX();
+				int pY = (int) expLoc.getY();
+				g.setColor(Color.BLUE);
+				g.fillOval(pX, pY, 10, 10);
+				g.setColor(Color.BLACK);
+				g.drawOval(pX, pY, 10, 10);
+			}
+		}
+		else
+		{
+			//Draw the ball
+			g.drawImage(ballImage, x-x/diameter, y-y/diameter, this);
 		}
 		
 		
