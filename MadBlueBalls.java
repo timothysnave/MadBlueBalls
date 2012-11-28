@@ -99,11 +99,11 @@ public class MadBlueBalls extends JFrame {
 				deadBall.create();
 				hasBounced = true;
 			}
-			else if (!hitTarget) // Explosion already happened
-			{
-				explosion.update();
-				deadBall.update();
-			}
+		}
+		if (hasBounced && !hitTarget) // Explosion already happened
+		{
+			explosion.update();
+			deadBall.update();
 		}
 	}
 	
