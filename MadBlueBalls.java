@@ -1,6 +1,5 @@
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -19,10 +18,12 @@ public class MadBlueBalls extends JFrame {
 	VectorObject ball;
 	int diameter;
 	Image dbImage;
+	Image success;
+	Image fail;
 	Graphics dbGraphics;
 	Vector velocity; // Unfortunately necessary
 	Vector gravity;
-	Vector friction;
+	Vector wind;
 	Vector targetLoc;
 	Vector targetCenter;
 	BufferedImage ballImage;
@@ -46,14 +47,21 @@ public class MadBlueBalls extends JFrame {
 		Background = ImageIO.read(new File("Background.png"));
 		grass = ImageIO.read(new File("grass.png"));
 		
+		// Set up end game images
+		success = ImageIO.read(new File("success.png"));
+		fail = ImageIO.read(new File("fail.png"));
+		
 		// Set up the target
 		target = ImageIO.read(new File("target.png"));
 		targetLoc = new Vector(950,500);
 		targetCenter = new Vector(targetLoc.getX()+8,targetLoc.getY()+23);
 		hitTarget = false;
 		
-		// Set up various simple things
+		// Forces
 		gravity = new Vector(0, 9.8);
+		wind = new Vector();
+		
+		// Set up various simple things
 		rand = new Random();
 		hasBounced = false;
 		
@@ -200,6 +208,14 @@ public class MadBlueBalls extends JFrame {
 		{
 			//Draw the ball
 			g.drawImage(ballImage, x-x/diameter, y-y/diameter, this);
+		}
+		
+		// Draw endgame images
+		if (x > 1300 || (ball.getVelocity().isZero() && hitTarget)) // SECOND CONDITION MAY FAIL
+			g.drawImage(success, 315, 200, this);
+		else if (hasBounced && explosion.getParticles().size()==0)
+		{
+			g.drawImage(fail, 315, 200, this);
 		}
 		
 		repaint();
